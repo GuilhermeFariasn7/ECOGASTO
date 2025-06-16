@@ -3,6 +3,10 @@ const transacoesController = require('../controllers/transacoesController');
 const verifyToken = require('../middlewares/verifyToken');
 
 router
+    .route('/transacoes/grafico')
+    .get(verifyToken, (req, res) => transacoesController.getGrafico(req, res));
+    //.get((req, res) => transacoesController.getGrafico(req, res));
+router
     .route('/transacoes')
     .post(verifyToken, (req, res) => transacoesController.create(req, res));
 
@@ -29,5 +33,7 @@ router
 router
     .route('/transacoesStatus/:id')
     .put(verifyToken, (req, res) => transacoesController.updateStatus(req, res));
+
+
 
 module.exports = router;

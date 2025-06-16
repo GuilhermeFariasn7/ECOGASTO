@@ -39,13 +39,13 @@ export default function MenuAdmin() {
             >
                 <strong>EXTRATO</strong>
             </div>
-            {/* EXTRATO */}
+            {/* Metas */}
             <div
                 className="p-2"
                 style={menuItemStyle}
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#67cf8d'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                onClick={() => router.push('/extrato/')} // Corrigido
+                onClick={() => router.push('/meta/')} // Corrigido
                 title="Visualizar Metas para traçar"
             >
                 <strong>Metas</strong>

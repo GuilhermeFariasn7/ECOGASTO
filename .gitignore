@@ -1,0 +1,32 @@
+# Node.js
+node_modules/
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# IDEs e editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Build / dist
+dist/
+build/
+
+# React (caso use CRA)
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Backup / compactados
+*.zip
+*.rar
+*.bak
