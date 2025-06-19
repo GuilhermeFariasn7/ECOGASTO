@@ -30,7 +30,7 @@ const GraficoGastosMensais = () => {
     const [tipo, setTipo] = useState('');
     const [tipoGrafico, setTipoGrafico] = useState('Bar');
     const [idCategoria, setIdCategoria] = useState('');
-
+    const METAS_API = "http://localhost:8080/api/metas";
     const buscarCategorias = async () => {
         try {
             const token = localStorage.getItem('authToken');
@@ -58,7 +58,7 @@ const GraficoGastosMensais = () => {
             if (tipo) config.params.tipo = tipo;
             if (idCategoria) config.params.idCategoria = idCategoria;
 
-            const response = await axios.get('http://localhost:8080/api/transacoes/grafico', config);
+            const response = await axios.get(`${METAS_API}/grafico`, config);
             setDados(response.data);
         } catch (error) {
             console.error('Erro ao buscar dados do gráfico:', error);

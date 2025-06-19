@@ -82,6 +82,25 @@ export default function Admin() {
         }
     };
 
+    const handleUpdateParcela = async (id) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const config = {
+                headers: { Authorization: `Bearer ${token}` }
+            };
+            
+
+            const response = await Axios.put(`${TRANSACAO_API}${id}`, transacaoSelecionada, config);
+
+            setMessage({ message: "Parcela alterada com sucesso!", status: "ok" });
+            window.location.reload();
+        } catch (error) {
+            console.error('Erro ao alterar parcela:', error);
+            setMessage({ message: "Erro ao alterar parcela! Favor contate o analista", status: "error" });
+        }
+    };
+
+
     const fetchParcelasByTransacaoId = async (id) => {
         try {
             setLoadingParcelas(true);
@@ -482,9 +501,9 @@ export default function Admin() {
                                                                 ))}
                                                                 <tr className="table-success"> {/* Linha verde para o total */}
                                                                     <td colSpan="2" className="text-end"> {/* Coluna para o total, ocupando 9 colunas */}
-                                                                        <strong>Totalizador:</strong> 
+                                                                        <strong>Totalizador:</strong>
                                                                     </td>
-                                                                    
+
                                                                     <td colSpan="1" className=""> {/* Coluna para o total, ocupando 9 colunas */}
                                                                         R$ {totalParcela.toFixed(2)} {/* Exibe o total formatado */}
                                                                     </td>
@@ -529,18 +548,41 @@ export default function Admin() {
                                 <div className="modal-body">
                                     <div className="row">
                                         {/* Lado Esquerdo */}
-                                        <div className="col-md-4 border-end">
-                                            <h6>Anexar Imagem</h6>
-                                            <form onSubmit={handleUpload}>
-                                                <input type="file" accept="image/*" onChange={handleFileChange} className="form-control mb-2" />
-                                                <button type="submit" className="btn btn-success">Enviar Imagem</button>
-                                            </form>
-                                            {uploadedImage && (
-                                                <div className="mt-3">
-                                                    <strong>Prévia:</strong>
-                                                    <img src={uploadedImage} alt="Imagem enviada" className="img-fluid mt-2 rounded" />
-                                                </div>
-                                            )}
+                                        <div className="col-md-6 border-end">
+                                            <div className="form-group">
+                                                <label className="form-label mt-2 mb-2" htmlFor="idTransacaoAlt">
+                                                    Id Transação Selecionada
+                                                </label>
+                                                <input
+                                                    className="form-control"
+                                                    type="number"
+                                                    id="idTransacaoAlt"
+                                                    name="idtransacoes"
+                                                    disabled
+                                                    value={transacaoSelecionada.idtransacoes}
+                                                />
+                                                <label className="form-label mt-2 mb-2" htmlFor="nomeTransacaoAlt">
+                                                    Nome <span className="text-danger">*</span>
+                                                </label>
+                                                <input
+                                                    className="form-control"
+                                                    type="text"
+                                                    id="nomeTransacaoAlt"
+                                                    name="nome"
+                                                    value={transacaoSelecionada.nome || ""}
+                                                    onChange={handleChange}
+                                                />
+                                                <label className="form-label mt-2 mb-2" htmlFor="descricaoTransacaoAlt">
+                                                    Descrição <span className="text-danger">*</span>
+                                                </label>
+                                                <textarea
+                                                    className='form-control'
+                                                    id='descricaoTransacaoAlt'
+                                                    name="descricao"
+                                                    value={transacaoSelecionada.descricao || ""}
+                                                    onChange={handleChange}
+                                                ></textarea>
+                                            </div>
                                         </div>
 
                                         {/* Lado Direito */}
@@ -587,7 +629,7 @@ export default function Admin() {
                                                     id="num_parcelas"
                                                     name="num_parcelas"
                                                     min="1"
-                                                    value={transacaoSelecionada.num_parcelas || transacaoSelecionada.numParcelas}
+                                                    value={transacaoSelecionada.num_parcelas || ""}
                                                     onChange={handleChange}
                                                 />
                                                 {showParcelaDay && (

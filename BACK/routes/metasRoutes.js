@@ -7,4 +7,9 @@ router
 router
     .route('/metas')
     .get(verifyToken, (req, res) => metasController.getAll(req, res));
+
+router
+    .route('/metas/grafico')
+    .get(verifyToken, (req, res) => metasController.getGrafico(req, res));
+    //.get((req, res) => transacoesController.getGrafico(req, res));
 module.exports = router;
