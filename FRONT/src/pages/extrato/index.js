@@ -33,7 +33,8 @@ export default function Admin() {
     const [imagemSelecionada, setImagemSelecionada] = useState(null);
     const [file, setFile] = useState(null);
     const [uploadedImage, setUploadedImage] = useState(null);
-
+    const [orderBy, setOrderBy] = useState('id');
+    const [orderType, setOrderType] = useState('asc');
     const dataAtual = new Date();
     const dia = String(dataAtual.getDate()).padStart(2, '0');
     const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
@@ -88,9 +89,14 @@ export default function Admin() {
             const config = {
                 headers: { Authorization: `Bearer ${token}` }
             };
-            
 
-            const response = await Axios.put(`${TRANSACAO_API}${id}`, transacaoSelecionada, config);
+            // Clona transacaoSelecionada e normaliza valor
+            const transacaoParaEnviar = { ...transacaoSelecionada };
+            if (transacaoParaEnviar.valor) {
+                transacaoParaEnviar.valor = transacaoParaEnviar.valor.toString().replace(',', '.');
+            }
+
+            const response = await Axios.put(`${TRANSACAO_API}${id}`, transacaoParaEnviar, config);
 
             setMessage({ message: "Parcela alterada com sucesso!", status: "ok" });
             window.location.reload();
@@ -99,6 +105,7 @@ export default function Admin() {
             setMessage({ message: "Erro ao alterar parcela! Favor contate o analista", status: "error" });
         }
     };
+
 
 
     const fetchParcelasByTransacaoId = async (id) => {
@@ -232,6 +239,45 @@ export default function Admin() {
         }));
     };
 
+    const handleOrderBy = (event) => {
+        const value = event.target.value;
+        setOrderBy(value);
+        sortFilteredTransacoes(value, orderType);
+    };
+
+    const handleOrderType = (event) => {
+        const value = event.target.value;
+        setOrderType(value);
+        sortFilteredTransacoes(orderBy, value);
+    };
+
+    const sortFilteredTransacoes = (campo, tipo) => {
+        const sorted = [...filteredTransacoes].sort((a, b) => {
+            let valA, valB;
+
+            if (campo === 'valorTotal') {
+                valA = parseFloat(a.valor) * parseInt(a.numParcelas);
+                valB = parseFloat(b.valor) * parseInt(b.numParcelas);
+            } else if (campo === 'valor') {
+                valA = parseFloat(a.valor) || 0;
+                valB = parseFloat(b.valor) || 0;
+            } else if (campo === 'nome' || campo === 'categoria' || campo === 'status') {
+                valA = a[campo]?.toString().toLowerCase();
+                valB = b[campo]?.toString().toLowerCase();
+            } else {
+                valA = a[campo];
+                valB = b[campo];
+            }
+
+            if (valA < valB) return tipo === 'asc' ? -1 : 1;
+            if (valA > valB) return tipo === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        setFilteredTransacoes(sorted);
+    };
+
+
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (typeof window !== 'undefined') {
@@ -286,44 +332,79 @@ export default function Admin() {
             <div className="d-flex flex-column" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
                 <NavAdmin />
                 <MenuAdmin />
-                <div className="d-flex align-items-center mt-4" style={{ width: '95%', marginLeft: '2%' }}>
-                    <div className="d-flex w-100 gap-3">
-                        {/* Busca por transação */}
-                        <div className="input-group" style={{ flexBasis: '350px' }}>
-                            <input
-                                type="text"
-                                className="form-control"
-                                style={{ maxWidth: '450px', fontSize: '0.9rem', height: '40px' }}
-                                placeholder="Busca por transação"
-                                value={searchName}
-                                onChange={handleSearchByName}
-                            />
-                            <span className="input-group-text" style={{ cursor: 'pointer' }}>
-                                <i className="fas fa-search" style={{ fontSize: '1rem' }}></i>
-                            </span>
-                        </div>
+                <div className="container mt-4">
+                    <div className="row gx-2 gy-2 align-items-center flex-nowrap">
 
-                        {/* Busca por ID */}
-                        <div className="input-group" style={{ flexBasis: '150px' }}>
-                            <input
-                                type="text"
-                                className="form-control"
-                                style={{ fontSize: '0.9rem', height: '40px' }}
-                                placeholder="Busca por ID"
-                                value={searchId}
-                                onChange={handleSearchById}
-                            />
-                            <span className="input-group-text" style={{ cursor: 'pointer' }}>
-                                <i className="fas fa-search" style={{ fontSize: '1rem' }}></i>
-                            </span>
+                        {/* Ordenar por */}
+                        <div className="col-auto">
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text">Ordenar</span>
+                                <select
+                                    className="form-select form-select-sm"
+                                    onChange={handleOrderBy}
+                                >
+                                    <option value="id">ID</option>
+                                    <option value="nome">Nome</option>
+                                    <option value="valor">Valor</option>
+                                    <option value="valorTotal">Valor Total</option>
+                                    <option value="categoria">Categoria</option>
+                                    <option value="status">Status</option>
+                                </select>
+                            </div>
                         </div>
-
-                        {/* Filtro de status */}
-                        <select className="form-select" style={{ flexBasis: '200px', height: '40px' }} onChange={handleSearchByStatus}>
-                            <option value="">Todos os Status</option>
-                            <option value="pendente">Pendente</option>
-                            <option value="pago">Pago</option>
-                        </select>
+                        {/* Tipo ASC/DESC */}
+                        <div className="col-auto">
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text">Tipo</span>
+                                <select
+                                    className="form-select form-select-sm"
+                                    onChange={handleOrderType}
+                                >
+                                    <option value="asc">Crescente</option>
+                                    <option value="desc">Decrescente</option>
+                                </select>
+                            </div>
+                        </div>
+                        {/* Busca Nome */}
+                        <div className="col-auto">
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text">Nome</span>
+                                <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="Buscar..."
+                                    value={searchName}
+                                    onChange={handleSearchByName}
+                                />
+                            </div>
+                        </div>
+                        {/* Busca ID */}
+                        <div className="col-auto">
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text">ID</span>
+                                <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="Buscar..."
+                                    value={searchId}
+                                    onChange={handleSearchById}
+                                />
+                            </div>
+                        </div>
+                        {/* Status */}
+                        <div className="col-auto">
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text">Status</span>
+                                <select
+                                    className="form-select form-select-sm"
+                                    onChange={handleSearchByStatus}
+                                >
+                                    <option value="">Todos</option>
+                                    <option value="pendente">Pendente</option>
+                                    <option value="pago">Pago</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div className="container-fluid mt-4">
